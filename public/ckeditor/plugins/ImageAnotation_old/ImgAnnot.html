@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <link href="AnotCSS/theme-dark/annotorious-dark.css" rel="stylesheet" />
+    <style>
+        html,
+        body {
+            min-height: 100%;
+            padding: 0;
+            margin: 0;
+            line-height: 22px;
+            position: absolute;
+        }
+
+        .column {
+            /*border-width: 5px;*/
+            border-style: initial;
+            position: relative;
+            float: none;
+            height: 100%;
+            text-align: center;
+        }
+    </style>
+    <script src="annotorious.min.js"></script>
+    <script src="jquery/jquery.slim.min.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (!window.parent.AnntationDialog) {
+                window.parent.AnntationDialog = await window.moduleSystem.getModule("AnntationDialog");
+            }
+            var elImg = document.querySelector("#imgID");
+            window.parent.AnntationDialog.loadPluginScript(anno, $(elImg), window);
+
+        });
+        function myopen(s, t) {
+            var popupLeft, popupTop;
+            var mouseX, mouseY, windowWidth, windowHeight;
+            mouseX = s.mouseEvent.clientX;
+            mouseY = s.mouseEvent.clientY;
+            windowWidth = s.mouseEvent.target.getAttribute('Width');
+            windowHeight = s.mouseEvent.target.getAttribute('Height');
+
+            var popupWidth = 202;
+            var popupHeight = 162;
+            if (this.offsetLeft != undefined)
+                mouseX = e.pageX - this.offsetLeft;
+            if (this.offsetTop != undefined)
+                mouseY = e.pageY; - this.offsetTop;
+
+            if (mouseX < 0)
+                mouseX = 0;
+            if (mouseY < 0)
+                mouseY = 0;
+            var dv = this.Ze();
+            // var pop = this.Ye();
+
+            if (mouseX + popupWidth > windowWidth)
+                popupLeft = mouseX - popupWidth;
+            else
+                popupLeft = mouseX;
+
+            if (mouseY + popupHeight > windowHeight)
+                popupTop = mouseY - popupHeight;
+            else
+                popupTop = mouseY;
+
+            if (popupLeft < s.mouseEvent.target.scrollLeft) {
+                popupLeft = s.mouseEvent.target.scrollLeft;
+            }
+
+            if (popupTop < s.mouseEvent.target.scrollTop) {
+                popupTop = s.mouseEvent.target.scrollTop;
+            }
+
+            if (popupLeft < 0 || popupLeft == undefined)
+                popupLeft = 0;
+            if (popupTop < 0 || popupTop == undefined)
+                popupTop = 0;
+
+            if (popupLeft > 300) popupLeft = popupLeft - 75;
+            if (popupTop > 300) popupTop = popupTop - 50;
+            t.editor.setPosition(new W(popupLeft, popupTop + 4));
+            t.editor.open(n, s);
+        }
+    </script>
+</head>
+
+<body>
+    <div class="column"><img alt="" class="annotatable" id="imgID" /></div>
+</body>
+
+</html>

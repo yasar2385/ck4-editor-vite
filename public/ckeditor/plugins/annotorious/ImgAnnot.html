@@ -1,0 +1,257 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>Annotorious OpenSeadragon Example</title><link href="https://fonts.googleapis.com/css?family=Lato&display=swap" rel="stylesheet"><link href="annotorious.min.css" rel="stylesheet"><style>html, body {
+        margin:0;
+        padding:0;
+        background-color:#e2e2e2;
+        height:100%;
+        font-family:Lato;
+        line-height:160%;
+      }
+      
+      .column {
+        max-width:700px;
+        padding:20px;
+        margin:0 auto;
+        background-color:#fff;
+        height:100%;
+        box-sizing:border-box;
+      }
+
+      h1 {
+        font-size:21px;
+        font-weight:normal;
+        margin:0;
+        padding:0;
+      }
+
+      p.instructions {
+        padding:10px 0 30px 0;
+      }
+
+      .openseadragon-canvas {
+        outline:none;
+        background-color:#efefef !important;
+      }
+
+      .a9s-selection-mask {
+        display:none;
+      }</style><script>var updatedAnnotation = {
+        "@context": "http://www.w3.org/ns/anno.jsonld",
+        "id": "#07475897-d2eb-4dce-aa12-ecb50771c734",
+        "type": "Annotation",
+        "body": [
+          {
+            "type": "TextualBody",
+            "value": "UPDATED ANNOTATION #2"
+          }
+        ],
+        "target": {
+          "selector": {
+            "type": "FragmentSelector",
+            "conformsTo": "http://www.w3.org/TR/media-frags/",
+            "value": "xywh=540,240,180,340"
+          }
+        }
+      };
+			var editor = window.parent.GlobalEditor;
+            var selection = editor.getSelection().getStartElement();
+            selection=selection.getName()=='span'?selection.find('img').getItem(0):selection;
+			//document.getElementById('imganno').src=selection.$.src;
+			var annoJSON={"@context": "http://www.w3.org/ns/anno.jsonld","id": "","type":"Annotation","body":[{"type":"TextualBody","value": "","creator": {"id": "","name": ""},"created": "","modified": ""}],"target": {"selector": [{"type":"FragmentSelector","conformsTo":"http://www.w3.org/TR/media-frags/","value": ""}]}};
+			var AnnoArray=[];
+      window.onload = function() {
+        var viewer = OpenSeadragon({
+          id: "openseadragon",
+          prefixUrl: "openseadragon/images/",
+          tileSources: {
+            type: "image",
+            url: selection.$.src
+          },
+          gestureSettingsTouch: {
+            pinchRotate: true
+          },
+          showRotationControl: true,
+          showFlipControl: true,
+          constrainDuringPan: true,
+        });
+        
+        var anno = OpenSeadragon.Annotorious(viewer, {
+          locale: 'auto',
+          drawOnSingleClick: false,
+          allowEmpty: true,
+		  inverted:true
+          // disableEditor: true
+        });
+
+
+        var toolToggle = document.getElementById('current-tool');
+        toolToggle.addEventListener('click', function() {   
+          if (toolToggle.innerHTML == 'TOOL: RECTANGLE') {
+            toolToggle.innerHTML = 'TOOL: POLYGON';
+            anno.setDrawingTool('polygon');
+          } else {
+            toolToggle.innerHTML = 'TOOL: RECTANGLE';
+            anno.setDrawingTool('rect');
+          }
+        });
+
+        var modeBtn = document.getElementById('mode');
+        /*modeBtn.addEventListener('click', function() {
+          if (modeBtn.innerHTML == 'MODE: VIEW') {
+            modeBtn.innerHTML = 'MODE: ANNOTATE';
+            anno.setDrawingEnabled(true);
+          } else {
+            modeBtn.innerHTML = 'MODE: VIEW';
+            anno.setDrawingEnabled(false);
+          }
+        });*/
+		anno.setDrawingEnabled(true);
+       anno.setAuthInfo({
+          id: window.parent.USER_INFO.MAIL_ID,
+          displayName: window.parent.USER_INFO.MAIL_ID_PREFIX
+        });
+		if(!!$(selection.$).parents('.fig').find('[data-annotate]').length){
+		$(selection.$).parents('.fig').find('[data-annotate]').each(function(){
+			annoJSON.target.selector[0].value=$(this).attr('data-annotate');
+			annoJSON.body[0].value=$(this).attr('data-user-comment-box');
+			annoJSON.body[0].creator.name=$(this).attr('data-annon');
+			annoJSON.body[0].creator.id=$(this).attr('data-user-name');
+			annoJSON.body[0].modified=$(this).attr('data-annom');
+			annoJSON.body[0].created=$(this).attr('data-annoc');
+			annoJSON.id=$(this).parent().attr('id');
+			var JSONVal = $.extend(true, {}, annoJSON);
+			AnnoArray.push(JSONVal);
+		})
+		if(!!AnnoArray.length){
+		anno.setAnnotations(AnnoArray);
+		}
+		}
+
+        anno.on('selectAnnotation', function(a, shape) {
+		$('.r6o-tag').remove();
+		$('.r6o-arrow-down').remove();
+		if($('.r6o-widget.comment').length>1){
+		$('.r6o-widget.comment').eq(1).remove();
+		$('.r6o-widget.comment').eq(0).addClass('editable');
+		$('.r6o-widget.comment').eq(0).find('textarea').removeAttr('disabled');
+		$('.r6o-widget.comment').eq(0).find('textarea')[0].focus();
+		}
+		$('.annotorious-popup').hide();
+          console.log('selected');
+        });
+
+        anno.on('cancelSelected', function(a) {
+          console.log('cancel');
+        });
+
+        anno.on('changeSelected', function(selected, previous) {
+          console.log('changed from', previous, 'to', selected);
+        });
+
+        anno.on('createAnnotation', function (annotation) {
+		var dataAnnot = annotation.target.selector.value;
+		var editor = window.top.parent.GlobalEditor;
+                var selection = editor.getSelection().getStartElement();
+                if (!!$(selection.$).parents('.fig').length) {
+                    var figID = $(selection.$).parents('.fig').attr('id');
+                    var nTxt = annotation.body[0].value,
+                        nId = annotation.id;
+                    //var htmlStringDOM = window.parent.noteSting(nTxt,0,nId,'note','new');		
+                    var htmlStringDOM = window.top.parent.NewQueryModule['M_FUN'].InsertDOM(nTxt, 0, nId, 'imgnote',
+                        'new');
+                    $(htmlStringDOM).find('[data-user-comment-box]').attr('data-annon', annotation.body[0].creator.name).attr('data-annom', annotation.body[0].modified).attr('data-annoc', annotation.body[0].created).attr('data-annotate', dataAnnot);
+					$(htmlStringDOM).find('[data-user-comment-box]');
+                    console.log(htmlStringDOM)
+                    //$(selection.$).parents('.fig').find('.caption .p').after(htmlStringDOM);
+                    let dom = window.top.parent.document.getElementById('aaa');
+                    // ? set data for  DOM manipulation
+                    dom.innerHTML = editor.getData();
+                    let cur_img = dom.querySelector('#' + figID);
+                    let caption = cur_img.querySelector('.caption');
+                    if (caption) $(caption).last().append(htmlStringDOM);
+                    else $(cur_img).find('.graphic').before(htmlStringDOM);
+                    //NoteRenumber_Temp(editor, dom);
+                    window.top.parent.NewQueryModule['M_FUN'].ReNumberNote(dom);
+                    // editor.setData(dom.innerHTML);
+                    window.top.parent.SET_DATA.setNewData(dom, {
+                        DOM_Empty: !0,
+                        reGenerateAll: !0,
+                        cleanHTML: !0
+                    }, figID);
+                    // TODO to handle
+                    window.top.parent.ImageAnnotateDialog.closeDialog();
+                    //window.top.parent.ImageAnnotateDialog.showIcon=true;
+                }
+          console.log('created', annotation);
+        });
+
+        anno.on('updateAnnotation', function(annotation, previous) {
+		 var editor = window.top.parent.GlobalEditor;
+                var selection = editor.getSelection().getStartElement();
+				var figID = $(selection.$).parents('.fig').attr('id');
+		var element =editor.document.getById(annotation.id);
+		if(!!element){
+		console.log(element);
+		$(element.$).find('[data-user-comment-box]').attr('data-annotate',annotation.target.selector.value);
+		$(element.$).find('[data-user-comment-box]').attr('data-user-comment-box',annotation.body[0].value);
+		}
+          console.log('updated', previous, 'with', annotation);
+        });
+
+        anno.on('clickAnnotation', function(annotation, shape) {
+          console.log('clicked', annotation);
+        });
+
+        anno.on('deleteAnnotation', function(annotation) {
+        var editor = window.top.parent.GlobalEditor;
+                var selection = editor.getSelection().getStartElement();
+				var figID = $(selection.$).parents('.fig').attr('id');
+		var element =editor.document.getById(annotation.id);
+		if(!!element){  
+		element.remove();
+		let dom = window.top.parent.document.getElementById('aaa');
+                    // ? set data for  DOM manipulation
+        dom.innerHTML = editor.getData();
+                    //NoteRenumber_Temp(editor, dom);
+        window.top.parent.NewQueryModule['M_FUN'].ReNumberNote(dom);
+		                    window.top.parent.SET_DATA.setNewData(dom, {
+                        DOM_Empty: !0,
+                        reGenerateAll: !0,
+                        cleanHTML: !0
+                    }, figID);
+                    // TODO to handle
+                    window.top.parent.ImageAnnotateDialog.closeDialog();
+		console.log('deleted', annotation);
+		}
+        });
+
+        anno.on('mouseEnterAnnotation', function(annotation) {
+          console.log('enter', annotation);
+		  anno.setDrawingEnabled(false);
+		  $('.annotorious-popup').show();
+		  $('.annotorious-popup-text').text(annotation.body[0].value);
+        });
+        
+        anno.on('mouseLeaveAnnotation', function(annotation) {
+          $('.annotorious-popup').hide();
+		  anno.setDrawingEnabled(true);
+		  $('.annotorious-popup-text').text('');
+		  console.log('leave', annotation);
+        });
+        anno.on('saveSelected',function(annotation){
+			console.log(annotation)
+		});
+
+$(window).mouseenter(function(event) {
+if(!!event.toElement&&event.toElement.nodeName=='rect'&&!$('.r6o-editor').length){
+console.log(event.screenX);
+console.log(event.screenY);
+$('.annotorious-popup').css('top',parseInt($(event.toElement).offset().top-50)+'px').css('left',$(event.toElement).offset().left+'px');
+}
+  })
+  $(window).mouseleave(function(event) {
+if(!!event.toElement&&event.toElement.nodeName!='rect'){
+console.log(event);
+$('.annotorious-popup').hide();
+}
+  })
+      }</script></head><body><div class="column"><p><button id="current-tool">TOOL: RECTANGLE</button> <button id="mode">MODE: VIEW</button></p><div id="openseadragon" style="width: 480px; height: 300px;"></div><div class="annotorious-popup" style="position: absolute;z-index: 9999;overflow-wrap: break-word;pointer-events: none;display:none;"><span class="annotorious-popup-text">img new</span></div></div><script src="openseadragon/openseadragon.3.0.0.min.js"></script><script src="openseadragon-annotorious.min.js"></script><script src="../../../UI/lib/jquery/jquery.min.js"></script></body></html>

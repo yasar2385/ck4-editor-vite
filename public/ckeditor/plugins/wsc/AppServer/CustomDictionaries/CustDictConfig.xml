@@ -1,0 +1,13 @@
+<CustomerDb>
+    <Dictionary DicId="1">
+    <FileName>custom_dictionary_name.txt</FileName>
+    <LangShortName>en_US</LangShortName>
+    <Description>An example of a plain textual custom dictionary for the American English language (en_US)</Description>
+    </Dictionary> 
+    <Dictionary DicId="2">
+    <FileName>custom_dictionary_name2.txt</FileName>
+    <LangShortName>en_GB</LangShortName>
+    <Description>An example of a plain textual custom dictionary for the British English language (en_GB)</Description>
+    </Dictionary>
+ 
+</CustomerDb>

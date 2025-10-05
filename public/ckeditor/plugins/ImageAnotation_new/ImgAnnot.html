@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link href="annotorious.min.css" rel="stylesheet" />
+    <style>
+        html, body {            
+            min-height: 100%;
+            padding: 0;
+            margin: 0;
+            line-height: 22px;
+            position: absolute;
+        }
+        .column {
+            border-style: initial;
+            position: relative;
+            float: none;
+            height: 100%;
+            text-align: center;
+        }
+    </style>   
+    <script src="../../../UI/lib/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="annotorious.min.js"></script>
+    <script>
+        (function() {
+            var arr_item = window.top.parent.ImageAnnotateDialog.ImgFunc.getImgSRC();
+            var realWidth = arr_item[1];
+            var realHeight = arr_item[2];
+            var a = $('#imgID');
+            $(a).attr("src", arr_item[0]);
+            var wid = parseInt(realWidth);
+            var hig = parseInt(realHeight);
+            var body_width = wid, body_hight = hig;
+            if (body_width < 300) {
+                body_width = 295;
+                $('body').width(body_width + "px");
+            }
+            if (body_hight < 200) {
+                body_hight = 195;
+                $('body').height(body_hight + "px");
+            }
+            if (hig > 700) {
+                $(a).attr('style', 'width:' + parseInt(body_width + 95) + 'px; height:' + parseInt(body_hight - 220) + 'px;top:10px;position:relative;left:0px;z-index:0;');
+                if (wid > 300 && hig > 200) {
+    
+                }
+            } else {
+                wid = body_width; hig = body_hight;
+                if ($(window.top).width() < wid) {
+                    wid = $(window.top).width();
+                    var resize_width = parseInt((wid * 30) / 100);
+                    wid -= resize_width;
+                }
+                if ($(window.top).height() < hig) {
+                    hig = $(window.top).height();
+                    var resize_height = parseInt((hig * 30) / 100);
+                    hig -= resize_height;
+                }
+                if (wid > 700) {
+                    var resizeWidth = parseInt((wid * 20) / 100);
+                    wid -= resizeWidth;
+                }else {
+                    var resizeWidth = parseInt((wid * 20) / 100);
+                    wid += resizeWidth;
+                }
+                if (hig > 400) {
+                    var resizeHeight = parseInt((hig * 20) / 100);
+                    hig -= resizeHeight;
+                }else {
+                    var resizeHeight = parseInt((hig * 20) / 100);
+                    hig += resizeHeight;
+                }
+                $(a).attr('style', 'width:' + parseInt(body_width + 95) + 'px; height:' + parseInt(body_hight + 40) + 'px;top:10px;position:relative;left:0px;z-index:0;');
+                if (body_width > 700) {
+                    $('body').width(parseInt(wid) + "px");
+                }
+                if (body_hight > 400) {
+                    $('body').height(parseInt(hig) + "px");
+                }
+            }
+            var iAnnotate = Annotorious.init({
+                image: 'imgID' // image element or ID
+            });
+          //anno.loadAnnotations(annotaters);
+          // Add event handlers using .on  
+          iAnnotate.on('createAnnotation', function(annotation) {
+           console.log(annotation);
+            var data_Annotate = "";
+            var texts = annotation.body[0].value;
+            if (texts != "") {
+                var contextURL = annotation.target.source;
+                var x = annotation.target.selector.value;
+                var y = annotation.target.selector.value;
+                var width = annotation.target.selector.value;
+                var height = annotation.target.selector.value;
+                data_Annotate = x + "," + y + "," + width + "," + height + ","  + contextURL;
+                var editor = window.top.parent.GlobalEditor;
+                var selection = editor.getSelection().getStartElement();
+                if(!!$(selection.$).parents('.fig').length){
+                    var figID = $(selection.$).parents('.fig').attr('id');
+                    var nTxt=texts,nId=window.parent.s4();
+                    var htmlStringDOM = window.parent.noteSting(nTxt,0,nId,'note','new');
+                    $(htmlStringDOM).find('[data-user-comment-box]').attr('data-annotate',data_Annotate);
+                    console.log(htmlStringDOM)
+                    //$(selection.$).parents('.fig').find('.caption .p').after(htmlStringDOM);
+                    let dom = window.top.parent.document.getElementById('aaa');
+                    // ? set data for  DOM manipulation
+                    dom.innerHTML = editor.getData(); 
+                    let cur_img =  dom.querySelector('#' + figID);
+                    $(cur_img).find('.caption .p').after(htmlStringDOM);
+                    NoteRenumber_Temp(editor, dom);
+                    editor.setData(dom.innerHTML);
+                    // TODO to handle
+                    window.top.parent.ImageAnnotateDialog.closeDialog();
+                }   
+            }
+          });
+        })()
+        iAnnotate.addHandler('onAnnotationCreated', function (annotation) {
+            var dataAnnot = "";
+            var teks = annotation.text;
+            if (teks != "") {
+                var contextURL = annotation.src;
+                var x = annotation.shapes[0].geometry.x;
+                var y = annotation.shapes[0].geometry.y;
+                var width = annotation.shapes[0].geometry.width;
+                var height = annotation.shapes[0].geometry.height;
+                dataAnnot = x + "," + y + "," + width + "," + height + ","  + contextURL;
+                var editor = window.top.parent.GlobalEditor;
+                var selection = editor.getSelection().getStartElement();
+                if(!!$(selection.$).parents('.fig').length){
+                        var figID = $(selection.$).parents('.fig').attr('id');
+                        var nId=window.parent.s4();
+                        var htmlStringDOM = window.parent.noteSting(teks,0,nId,'note','new');
+                        $(htmlStringDOM).find('[data-user-comment-box]').attr('data-annotate',dataAnnot);
+                        console.log(htmlStringDOM)
+                        // $(selection.$).parents('.fig').find('.caption .p').after(htmlStringDOM);
+                        let dom = window.top.parent.document.getElementById('aaa');
+                        // ? set data for  DOM manipulation
+                        dom.innerHTML = editor.getData(); 
+                        let cur_img =  dom.querySelector('#' + figID);
+                        $(cur_img).find('.caption .p').after(htmlStringDOM);
+                        NoteRenumber_Temp(editor, dom);
+                        editor.setData(dom.innerHTML);
+                        // TODO to handle
+                        window.top.parent.ImageAnnotateDialog.closeDialog();
+                }   
+            }    
+        });
+        function NoteRenumber_Temp(editor,dom){
+            var mList = $(dom).find('[data-class="ckcommentsfull"][data-status]'), nInd=1, qInd=1;
+            $.each(mList, function(x,y){
+                if(this.parentElement.hasAttribute('data-action-hidden')) return true;
+                var IsQuery = $(this).attr('data-label').indexOf('AQ') != -1?true:false,
+                    IsLab = IsQuery?('AQ'+qInd):('C'+nInd);
+                this.setAttribute('data-label', IsLab);
+                IsQuery?(qInd++):(nInd++);
+            });
+        }
+      </script>
+</head>
+<body>
+    <div id="content"><img alt="" id="imgID" class="annotate"></div>
+</body>
+</html>
