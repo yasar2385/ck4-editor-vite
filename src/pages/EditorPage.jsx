@@ -42,7 +42,7 @@ export default function EditorPage() {
 
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">
-            <Header title="SmartDocs CKEditor-4" />
+            <Header fixed title="CK4 SmartDocs" />
 
             {/* Navbars */}
             <div className="z-10 shadow-sm bg-white">
