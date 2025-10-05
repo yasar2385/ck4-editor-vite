@@ -11,7 +11,7 @@ import Footer from '../components/Footer';
 export default function EditorPage() {
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">
-            <Header title="SmartDocs Editor" />
+            <Header title="SmartDocs CKEditor-4" />
 
             {/* Navbars */}
             <div className="z-10 shadow-sm bg-white">

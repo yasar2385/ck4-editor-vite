@@ -9,8 +9,8 @@ export default function App() {
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container mx-auto flex justify-between items-center py-4 px-4 md:px-8">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="HHESDER Logo" className="h-10 w-auto" />
-            <h1 className="text-xl font-bold tracking-tight">HHESDER Publishing</h1>
+            <img src="/logo.png" alt="SYD Logo" className="h-10 w-auto" />
+            <h1 className="text-xl font-bold tracking-tight">SYD Publishing</h1>
           </div>
           <nav className="hidden md:flex gap-6 text-sm font-medium">
             <a href="#about" className="hover:text-blue-600">About</a>
@@ -124,7 +124,7 @@ export default function App() {
           <div>
             <h5 className="text-lg font-semibold mb-2">Head Office</h5>
             <p>
-              HHESDER Publishing Pvt. Ltd.<br />
+              SYD Publishing Pvt. Ltd.<br />
               123 Knowledge Park,<br />
               Chennai, India 600042
             </p>
@@ -134,14 +134,14 @@ export default function App() {
           <div>
             <h5 className="text-lg font-semibold mb-2">Contact Us</h5>
             <p>📞 +91-44-2222-1111</p>
-            <p>📧 info@hhesderpublishing.com</p>
+            <p>📧 info@SYDpublishing.com</p>
           </div>
 
           {/* Map */}
           <div>
             <h5 className="text-lg font-semibold mb-2">Find Us</h5>
             <iframe
-              title="HHESDER Location"
+              title="SYD Location"
               src="https://www.google.com/maps?q=Chennai,India&output=embed"
               width="100%"
               height="180"
@@ -153,7 +153,7 @@ export default function App() {
           </div>
         </div>
         <div className="text-center mt-8 text-sm text-gray-300">
-          © {new Date().getFullYear()} HHESDER Publishing. All rights reserved.
+          © {new Date().getFullYear()} SYD Publishing. All rights reserved.
         </div>
       </footer>
     </div>
