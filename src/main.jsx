@@ -7,6 +7,12 @@ import './index.css';
 // ✅ Bootstrap JS bundle (with Popper included)
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
+// ✅ Import jQuery and make it global
+import $ from 'jquery';
+window.$ = $;
+window.jQuery = $;
+
+
 import { UserDashboard, AdminDashboard, EditorReadOnlyPage, EditorPage } from './pages/index.js'; // ✅ import the components
 
 
