@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 export default function App() {
+  const navigate = useNavigate();
+
   return (
     <div className="font-sans bg-gray-50 text-gray-800 notranslate" translate="no">
       {/* Header */}
@@ -38,24 +42,50 @@ export default function App() {
       {/* Services Section */}
       <section id="services" className="container mx-auto py-16 px-6 md:px-10">
         <h3 className="text-2xl md:text-3xl font-bold mb-10 text-center">Our Core Services</h3>
-        <div className="grid md:grid-cols-3 gap-8">
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {[
             {
-              title: "Book Publishing",
-              desc: "Comprehensive publishing solutions for academic, professional, and educational books.",
+              title: "User Dashboard",
+              desc: "Access user-specific reports, manuscripts, and publishing workflows.",
+              route: "/dashboard",
+              color: "bg-blue-600 hover:bg-blue-700",
             },
             {
-              title: "Article Processing",
-              desc: "End-to-end support for journal article submissions, peer review, and production workflows.",
+              title: "Admin Dashboard",
+              desc: "Manage users, publishing pipelines, and system configurations.",
+              route: "/admin",
+              color: "bg-green-600 hover:bg-green-700",
             },
             {
-              title: "Publishing Operations",
-              desc: "XML, copyediting, typesetting, design, and digital delivery for global publishers.",
+              title: "Editor Read-Only",
+              desc: "View assigned articles and manage comments in read-only mode.",
+              route: "/editor",
+              color: "bg-yellow-500 hover:bg-yellow-600",
+            },
+            {
+              title: "Editor Workspace",
+              desc: "Collaborate, edit manuscripts, and handle review workflows efficiently.",
+              route: "/editor",
+              color: "bg-red-600 hover:bg-red-700",
             },
           ].map((s) => (
-            <div key={s.title} className="p-6 bg-white rounded-xl shadow hover:shadow-lg transition">
-              <h4 className="text-xl font-semibold mb-3 text-blue-600">{s.title}</h4>
-              <p>{s.desc}</p>
+            <div
+              key={s.title}
+              className="p-6 bg-white rounded-xl shadow hover:shadow-lg transition flex flex-col justify-between"
+            >
+              <div>
+                <h4 className="text-xl font-semibold mb-3 text-blue-600">{s.title}</h4>
+                <p className="mb-5">{s.desc}</p>
+              </div>
+              <div className="mt-auto">
+                <button
+                  onClick={() => navigate(s.route)}
+                  className={`${s.color} text-white w-full px-4 py-2 rounded-lg font-medium transition`}
+                >
+                  Go to {s.title}
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -67,10 +97,19 @@ export default function App() {
           <h3 className="text-2xl md:text-3xl font-bold mb-10">Our Global Clients</h3>
           <div className="flex flex-wrap justify-center gap-8 items-center opacity-80">
             {[
-              "Elsevier", "Taylor & Francis", "PLOS", "Wolters Kluwer", "Springer Nature",
-              "Medknow", "Bloomberg", "Peter Lang"
+              "Elsevier",
+              "Taylor & Francis",
+              "PLOS",
+              "Wolters Kluwer",
+              "Springer Nature",
+              "Medknow",
+              "Bloomberg",
+              "Peter Lang",
             ].map((name) => (
-              <div key={name} className="text-lg font-medium text-gray-700 border border-gray-200 rounded-md px-4 py-2 bg-white">
+              <div
+                key={name}
+                className="text-lg font-medium text-gray-700 border border-gray-200 rounded-md px-4 py-2 bg-white"
+              >
                 {name}
               </div>
             ))}
@@ -84,9 +123,11 @@ export default function App() {
           {/* Address */}
           <div>
             <h5 className="text-lg font-semibold mb-2">Head Office</h5>
-            <p>HHESDER Publishing Pvt. Ltd.<br />
+            <p>
+              HHESDER Publishing Pvt. Ltd.<br />
               123 Knowledge Park,<br />
-              Chennai, India 600042</p>
+              Chennai, India 600042
+            </p>
           </div>
 
           {/* Contact */}
