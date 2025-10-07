@@ -1,6 +1,7 @@
 /**
  * src/core/editorSocketBridge.jsx
  * Unified CKEditor event + Automerge + WebSocket handler
+ * Using Automerge.load() for better CRDT state management
  */
 
 import { useRef, useCallback } from "react";
@@ -25,30 +26,74 @@ export default function useEditorSocketBridge(
   onEditorEvent
 ) {
   const editorRef = useRef(null);
-  const docRef = useRef(Automerge.init());
+  const docRef = useRef(null);
+  const headRef = useRef(null); // Track document head for merge conflicts
   const applyingRemote = useRef(false);
+  const pendingChanges = useRef(new Map()); // Track local changes
 
-  // ✅ Binary-aware socket
+  // Initialize empty doc on first load
+  const initializeDoc = useCallback(() => {
+    if (!docRef.current) {
+      docRef.current = Automerge.init();
+      docRef.current = Automerge.change(docRef.current, (d) => {
+        d.html = "";
+        d.lastUser = userId;
+        d.updatedAt = new Date().toISOString();
+        d.version = 0;
+      });
+    }
+  }, [userId]);
+
+  // ✅ Better approach: Merge remote changes into document state
   const { sendMessage } = useSocket("/collaboration", async (msg) => {
-    if (msg.type === "binary") {
+    if (msg.type === "binary" && msg.data) {
       try {
-        const [newDoc] = Automerge.applyChanges(docRef.current, [msg.data]);
-        docRef.current = newDoc;
+        applyingRemote.current = true;
 
-        const newHTML = newDoc.html || "";
+        // Load the remote document from binary
+        const remoteDoc = Automerge.load(msg.data);
+
+        if (!docRef.current) {
+          // First sync: use remote doc as base
+          docRef.current = remoteDoc;
+          headRef.current = Automerge.getHeads(docRef.current);
+        } else {
+          // Merge remote changes into local doc
+          docRef.current = Automerge.merge(docRef.current, remoteDoc);
+          headRef.current = Automerge.getHeads(docRef.current);
+        }
+
+        // Extract updated content
+        const docState = Automerge.toJS(docRef.current);
+        const newHTML = docState.html || "";
+
+        console.log("📥 Remote change merged:", {
+          newHTML,
+          lastUser: docState.lastUser,
+          updatedAt: docState.updatedAt,
+        });
+
+        // Update editor only if content changed
         const editor = editorRef.current;
-        if (editor && !applyingRemote.current) {
+        if (editor) {
           const current = editor.getData();
-          if (newHTML !== current) {
-            applyingRemote.current = true;
+          if (newHTML !== current && newHTML.trim() !== current.trim()) {
             editor.setData(newHTML, {
-              callback: () => (applyingRemote.current = false),
+              callback: () => {
+                applyingRemote.current = false;
+              },
             });
-            emitEvent("remoteUpdate", { length: newHTML.length });
+            emitEvent("remoteUpdate", {
+              length: newHTML.length,
+              user: docState.lastUser,
+            });
+          } else {
+            applyingRemote.current = false;
           }
         }
       } catch (err) {
-        console.error("⚠️ Failed to apply Automerge change:", err);
+        console.error("⚠️ Failed to merge Automerge change:", err);
+        applyingRemote.current = false;
       }
     }
   });
@@ -58,25 +103,41 @@ export default function useEditorSocketBridge(
     typeof onEditorEvent === "function" &&
     onEditorEvent({ type, details, time: new Date().toLocaleTimeString() });
 
-  // 🔹 Editor change → Automerge change → binary send
+  // 🔹 Editor change → Automerge change → send full doc state
   const handleEditorChange = useDebounce(() => {
     const editor = editorRef.current;
     if (!editor || applyingRemote.current) return;
 
     const html = editor.getData();
-    const prevDoc = docRef.current;
-    const nextDoc = Automerge.change(prevDoc, (d) => {
-      d.html = html;
-      d.lastUser = userId;
-      d.updatedAt = new Date().toISOString();
-    });
 
-    const change = Automerge.getLastLocalChange(nextDoc);
-    docRef.current = nextDoc;
+    try {
+      // Clone document if it's outdated before making changes
+      let workingDoc = docRef.current;
+      if (Automerge.getHeads(workingDoc).length > 0) {
+        workingDoc = Automerge.clone(workingDoc);
+      }
 
-    if (change) {
-      sendMessage(change); // ✅ send raw Uint8Array
-      emitEvent("localChange", { length: html.length });
+      // Update document with change
+      const nextDoc = Automerge.change(workingDoc, (d) => {
+        d.html = html;
+        d.lastUser = userId;
+        d.updatedAt = new Date().toISOString();
+        d.version = (d.version || 0) + 1;
+      });
+
+      docRef.current = nextDoc;
+      headRef.current = Automerge.getHeads(docRef.current);
+
+      // Send as binary snapshot for better merge resolution
+      const binary = Automerge.save(nextDoc);
+      sendMessage(binary); // Send raw Uint8Array directly
+
+      emitEvent("localChange", {
+        length: html.length,
+        version: nextDoc.version || 1,
+      });
+    } catch (err) {
+      console.error("⚠️ Failed to save doc:", err);
     }
   }, 500);
 
@@ -93,20 +154,23 @@ export default function useEditorSocketBridge(
       if (!instance || editorRef.current === instance) return;
       editorRef.current = instance;
 
-      // Initialize Automerge doc with current data
-      docRef.current = Automerge.change(docRef.current, (d) => {
-        d.html = instance.getData();
-        d.lastUser = userId;
-      });
+      // Initialize document
+      initializeDoc();
+
+      // Set initial editor content from doc
+      const docState = Automerge.toJS(docRef.current);
+      if (docState.html) {
+        instance.setData(docState.html);
+      }
 
       instance.on("change", handleEditorChange);
       instance.on("key", handleEditorChange);
       instance.on("paste", handleEditorChange);
       instance.on("click", handleClick);
 
-      emitEvent("bind", { message: "Editor events bound (Automerge)" });
+      emitEvent("bind", { message: "Editor events bound with CRDT merge strategy" });
     },
-    [handleEditorChange]
+    [handleEditorChange, initializeDoc]
   );
 
   return { bindEditorEvents };

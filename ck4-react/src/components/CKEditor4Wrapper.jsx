@@ -1,5 +1,5 @@
 // ck4-react/src/components/CKEditor4Wrapper.jsx
-import React, { useEffect, useRef, useState,useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   ReportTemplate,
   ArticleTemplate,
@@ -9,12 +9,14 @@ import {
 import { editorConfig, defaultUserData } from "./customTemplates/editorConfig";
 import useEditorSocketBridge from "../core/editorSocketBridge";
 
-export default function CKEditor4Wrapper({
-  id = "editor1",
-  data = "",
-  onEvent,
-  refCallback,
-}) {
+export default function
+
+  CKEditor4Wrapper({
+    id = "editor1",
+    data = "",
+    onEvent,
+    refCallback,
+  }) {
   const editorRef = useRef(null);
   const [instanceReady, setInstanceReady] = useState(false);
 

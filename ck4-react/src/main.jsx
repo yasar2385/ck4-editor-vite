@@ -13,7 +13,7 @@ window.$ = $;
 window.jQuery = $;
 
 
-import { UserDashboard, AdminDashboard, EditorReadOnlyPage, EditorPage, LiveMessenger } from './pages/index.js'; // ✅ import the components
+import { UserDashboard, AdminDashboard, EditorReadOnlyPage, EditorPage, LiveMessenger, MultiTextareaSync } from './pages/index.js'; // ✅ import the components
 
 
 createRoot(document.getElementById('root')).render(
@@ -25,6 +25,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/chat" element={<LiveMessenger />} />
         <Route path="/editor" element={<EditorPage />} />
+        <Route path="/automerge-demo" element={<MultiTextareaSync />} />
 
         <Route path="/" element={<App />} />
       </Routes>

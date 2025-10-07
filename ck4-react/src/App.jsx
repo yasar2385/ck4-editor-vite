@@ -74,6 +74,11 @@ export default function App() {
               desc: "Edit and sync documents live with your team.",
               route: "/editor",
               color: "bg-blue-500 hover:bg-blue-600",
+            }, {
+              title: "Automerge Textarea Demo",
+              desc: "Experiment with live Automerge updates between three textareas.",
+              route: "/automerge-demo",
+              color: "bg-cyan-500 hover:bg-cyan-600",
             }
 
           ].map((s) => (

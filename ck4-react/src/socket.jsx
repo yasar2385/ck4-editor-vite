@@ -14,6 +14,14 @@ import { useEffect, useRef } from "react";
 export default function useSocket(endpoint, onMessage, onStatusChange) {
   const ws = useRef(null);
   const reconnectTimer = useRef(null);
+  function isBinary(input) {
+    const payload = input?.data ?? input; // unwrap .data if present
+    return (
+      payload instanceof Uint8Array ||
+      payload instanceof ArrayBuffer ||
+      (typeof Blob !== "undefined" && payload instanceof Blob) // optional for browser
+    );
+  }
 
   const connect = () => {
     const socket = new WebSocket(`ws://localhost:8025${endpoint}`);
@@ -44,8 +52,11 @@ export default function useSocket(endpoint, onMessage, onStatusChange) {
     socket.onmessage = (event) => {
       try {
         // 🧩 Binary message — only for collaboration endpoint
-        if (endpoint === "/collaboration" && event.data instanceof ArrayBuffer) {
-          const bytes = new Uint8Array(event.data);
+        if (endpoint === "/collaboration" && isBinary(event.data)) {
+          const bytes = event.data instanceof ArrayBuffer
+            ? new Uint8Array(event.data)
+            : new Uint8Array(event.data.buffer ?? event.data);
+
           onMessage({ type: "binary", data: bytes });
           return;
         }
@@ -79,8 +90,9 @@ export default function useSocket(endpoint, onMessage, onStatusChange) {
     }
 
     // 🧩 Collaboration endpoint — send raw binary
-    if (endpoint === "/collaboration" && (data instanceof Uint8Array || data instanceof ArrayBuffer)) {
-      socket.send(data);
+    if (endpoint === "/collaboration" && isBinary(data)) {
+      const payload = data?.data ?? data; // unwrap
+      socket.send(payload);
       return;
     }
 
@@ -88,6 +100,7 @@ export default function useSocket(endpoint, onMessage, onStatusChange) {
     if (typeof data === "object") socket.send(JSON.stringify(data));
     else socket.send(String(data));
   };
+
 
   return { sendMessage };
 }
