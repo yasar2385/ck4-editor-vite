@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Collaborative Editor</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="script.js"></script>
+</head>
+<body>
+<h2>Collaborative Document</h2>
+
+
+
+<textarea id="para1" rows="3" cols="50">Paragraph 1 content</textarea>
+<span id="para1_status" style="color:red; margin-left:10px;"></span><br/>
+
+<textarea id="para2" rows="3" cols="50">Paragraph 2 content</textarea>
+<span id="para2_status" style="color:red; margin-left:10px;"></span><br/>
+
+
+<button onclick="lockParagraph('doc1','para1','userA')">Lock Para1</button>
+<button onclick="unlockParagraph('doc1','para1','userA')">Unlock Para1</button>
+<button onclick="lockParagraph('doc1','para2','userB')">Lock Para2</button>
+<button onclick="unlockParagraph('doc1','para2','userB')">Unlock Para2</button>
+
+</body>
+</html>

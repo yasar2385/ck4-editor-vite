@@ -1,0 +1,14 @@
+// ck4-react\src\hooks\editorOT.jsx
+import useSocket from "../socket";
+
+export default function useCollabOT(onRemoteOp) {
+    const { sendMessage } = useSocket("/collaboration", (msg) => {
+        if (msg.type === "op") onRemoteOp(msg);
+    });
+
+    const submitOp = (op) => {
+        sendMessage({ type: "submit", op });
+    };
+
+    return { submitOp };
+}
