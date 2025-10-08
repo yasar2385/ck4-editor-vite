@@ -12,9 +12,10 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
+  base: "./",
   server: {
     port: 5173,
     proxy: {
@@ -25,7 +26,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: "../backend/src/main/resources/webapp",
-    emptyOutDir: true,
+    outDir: "dist",
+    assetsDir: "assets",
   },
 });

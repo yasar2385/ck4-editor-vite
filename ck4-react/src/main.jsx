@@ -13,19 +13,20 @@ window.$ = $;
 window.jQuery = $;
 
 
-import { UserDashboard, AdminDashboard, EditorReadOnlyPage, EditorPage, LiveMessenger, MultiTextareaSync } from './pages/index.js'; // ✅ import the components
+import { UserDashboard, AdminDashboard, EditorReadOnlyPage, EditorPage, LiveMessenger, ChatComponent, FileUploadComponent } from './pages/index.js'; // ✅ import the components
 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename="/vite">
       <Routes>
         {/* Example routes (uncomment when ready) */}
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/chat" element={<LiveMessenger />} />
         <Route path="/editor" element={<EditorPage />} />
-        <Route path="/automerge-demo" element={<MultiTextareaSync />} />
+        <Route path="/chatBot" element={<ChatComponent />} />
+        <Route path="/botDocQA" element={<FileUploadComponent />} />
 
         <Route path="/" element={<App />} />
       </Routes>
